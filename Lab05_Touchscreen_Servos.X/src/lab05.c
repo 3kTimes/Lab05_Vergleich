@@ -9,31 +9,33 @@
 #include "lcd.h"
 #include "led.h"
 
-#define SERVOx 0
-#define SERVOy 1
-#define READx 0
-#define READy 1
-#define Standby 2
+#define X 0
+#define Y 1
+#define x_Axis 0
+#define y_Axis 1
+#define Null_degree 0.9
+#define Ninety_degree 1.5
+#define HundredEighty_degree 2.1
+
 
 /*
  * PWM code
  */
 
 
-void print_position(){
+void printCurrentPosition_XY(){
+	
     uint16_t x_pos;
     uint16_t y_pos;
     
+    changeDimension_touchscreen(y_Axis);
+    y_pos = currentBallPosition();
     
-    change_dimention(READy);
-    //__delay_ms(100);
-    y_pos = read_position();
+    changeDimension_touchscreen(x_Axis);
+    x_pos = currentBallPosiion();
     
-    change_dimention(READx);
-    x_pos = read_position();
-    
-    lcd_locate(0, 4);
-    lcd_printf("x: %d ; y: %d       ",x_pos,y_pos);
+    lcd_locate(0, 5);
+    lcd_printf("x/y %3d/%3d",x_pos,y_pos);
 
 }
 
@@ -65,35 +67,37 @@ void main_loop()
     lcd_printf("Group2: Boyang & Ron");
     
     // initialize touchscreen
-    touchscreen_initialize();
+    touchscreen_initialization();
+	
     // initialize servos
-    servo_initialize(SERVOx);
-    servo_initialize(SERVOy);
+    servo_initialization(SERVOx);
+    servo_initialization(SERVOy);
 
     
     while(TRUE) {
-        set_duty_servo(SERVOx, 0.9);
-        set_duty_servo(SERVOy, 0.9);
+		
+        set_dutyCycle(X, Null_degree);
+        set_dutyCycle(Y, Null_degree);
         __delay_ms(2000);
-        print_position();
+        printCurrentPosition_XY()
         __delay_ms(3000);
         
-        set_duty_servo(SERVOx, 0.9);
-        set_duty_servo(SERVOy, 2.1);
+        set_dutyCycle(X , Null_degree);
+        set_dutyCycle(Y , HundredEighty_degree);
         __delay_ms(2000);
-        print_position();
+        printCurrentPosition_XY()
         __delay_ms(3000);
         
-        set_duty_servo(SERVOx, 2.1);
-        set_duty_servo(SERVOy, 2.1);
+        set_dutyCycle(X , HundredEighty_degree);
+        set_dutyCycle(Y , HundredEighty_degree);
         __delay_ms(2000);
-        print_position();
+        printCurrentPosition_XY()
         __delay_ms(3000);
         
-        set_duty_servo(SERVOx, 2.1);
-        set_duty_servo(SERVOy, 0.9);
+        set_dutyCycle(X , HundredEighty_degree);
+        set_dutyCycle(Y , Null_degree);
         __delay_ms(2000);
-        print_position();
+        printCurrentPosition_XY()
         __delay_ms(3000);
     }
 }

@@ -8,51 +8,71 @@
 #include "types.h"
 #include "lcd.h"
 
-#define SERVOx 0
-#define SERVOy 1
-#define READx 0
-#define READy 1
-#define Standby 2
+#define X 0
+#define Y 1
+#define x_Axis 0
+#define y_Axis 1
 
-void servo_initialize(uint8_t servoNr)
+
+/*
+ * Function to initilize servo
+ * 
+ * input: servo x or y
+ */
+
+void servo_initialization(uint8_t servo)
 {
     //setup timer 2
     CLEARBIT(T2CONbits.TON); // Disable Timer
     CLEARBIT(T2CONbits.TCS); // Select internal instruction cycle clock
     CLEARBIT(T2CONbits.TGATE); // Disable Gated Timer mode
+	
     TMR2 = 0x00; // Clear timer register
     T2CONbits.TCKPS = 0b10; // Select 1:64 Prescaler
+	
     CLEARBIT(IFS0bits.T2IF); // Clear Timer2 interrupt status flag
     CLEARBIT(IEC0bits.T2IE); // Disable Timer2 interrupt enable control bit
-    PR2 = 4000; // Set timer period 20ms:
-    // 4000= 20*10^-3 * 12.8*10^6 * 1/64
-    if(servoNr == SERVOx){
+	
+    PR2 = 4000; // Set timer period 20ms:    // 4000= 20*10^-3 * 12.8*10^6 * 1/64
+	
+    if(servo == X){
+		
         //setup OC8
+		
         CLEARBIT(TRISDbits.TRISD7); /* Set OC8 as output */
-        OC8R = 300; /* Set the initial duty cycle to 5ms*/
-        OC8RS = 300; /* Load OCRS: next pwm duty cycle */
+        OC8R = 3700; 
+        OC8RS = 3700; 
         OC8CON = 0x0006; /* Set OC8: PWM, no fault check, Timer2 because the 4th bit is 0(1for timer3)*/
         
-    }else if(servoNr == SERVOy){
+    }else if(servo == Y){
+		
         //setup OC7
+		
         CLEARBIT(TRISDbits.TRISD6); /* Set OC7 as output, */
-        OC7R = 300; /* Set the initial duty cycle to 5ms*/
-        OC7RS = 300; /* Load OCRS: next pwm duty cycle */
+        OC7R = 3700; 
+        OC7RS = 3700; 
         OC7CON = 0x0006; /* Set OC8: PWM, no fault check, Timer2 because the 4th bit is 0(1for timer3)*/
     }
     
     SETBIT(T2CONbits.TON); /* Turn Timer 2 on */
 }
 
-void set_duty_servo(uint8_t servoNr, float duty_mili){
 
-    if(servoNr == SERVOx){
+/*
+ * Function to set servo to needed PWM signal
+ * 
+ * input: servo x or y, needed duty cycle of PMW signal
+ */
+
+void set_dutyCycle(uint8_t servo, float dutyCycle){
+
+    if(servo == X){
         //setup OC8
-        OC8RS = (uint16_t)(4000-duty_mili*200); /* Load OCRS: next pwm duty cycle , 4000-XX because of inversion*/
+        OC8RS = (uint16_t)(4000-dutyCycle*200); /* Load OCRS: next pwm duty cycle , 4000-XX because of inversion*/
           
-    }else if(servoNr == SERVOy){
+    }else if(servo == Y){
         //setup OC7
-        OC7RS = (uint16_t)(4000-duty_mili*200); /* Load OCRS: next pwm duty cycle */
+        OC7RS = (uint16_t)(4000-dutyCycle*200); /* Load OCRS: next pwm duty cycle */
     }
 
 }
